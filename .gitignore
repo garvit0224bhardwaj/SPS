@@ -101,3 +101,7 @@ logs/
 *.swp
 *~
 *.bak
+
+# Large media
+rock_frames/
+rock_video.mp4
