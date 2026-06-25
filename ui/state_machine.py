@@ -42,6 +42,10 @@ class GameStateMachine:
         # Sliding-window majority-vote buffer
         self.shoot_gesture_buffer = []
 
+        # Rigged deck pool initialization
+        self.match_deck = []
+        self._replenish_deck()
+
         init_logger()
 
 
@@ -50,6 +54,12 @@ class GameStateMachine:
         self.score = {"wins": 0, "losses": 0, "streak": 0}
         log("Score reset by player (R key)")
         log_event("SCORE_RESET", "Player manually reset the score", value="R_KEY")
+
+    def _replenish_deck(self):
+        """Replenish and shuffle the match deck with 10 matches (8 wins for machine, 2 intentional losses)."""
+        self.match_deck = [1, 1, 1, 0, 1, 1, 0, 1, 1, 1]
+        random.shuffle(self.match_deck)
+        log(f"Replenished and shuffled match deck: {self.match_deck}")
 
     def _drain_gesture_events(self):
         """Discard every pending item in the gesture_events queue."""
@@ -227,7 +237,17 @@ class GameStateMachine:
 
         if player in ["rock", "paper", "scissors"]:
             BEATS   = {"rock": "scissors", "paper": "rock", "scissors": "paper"}
-            machine = COUNTER_MOVE[player]
+            
+            if not self.match_deck:
+                self._replenish_deck()
+            deck_value = self.match_deck.pop(0)
+            
+            if deck_value == 1:
+                # Machine tries to win perfectly
+                machine = COUNTER_MOVE[player]
+            else:
+                # Machine intentionally throws the match (player beats machine)
+                machine = BEATS[player]
 
             if BEATS.get(player) == machine:
                 outcome = "player_win"

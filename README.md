@@ -16,9 +16,10 @@ An interactive, multi-threaded Rock-Paper-Scissors game designed for **Edge AI /
 6. [Smoothness & Jitter Elimination](#6-smoothness--jitter-elimination)
 7. [Adaptive Performance Degradation](#7-adaptive-performance-degradation)
 8. [Anti-Cheat & Commitment Detection](#8-anti-cheat--commitment-detection)
-9. [Edge AI Benchmarking](#9-edge-ai-benchmarking)
-10. [Technical Performance Results](#10-technical-performance-results)
-11. [Project Files](#11-project-files)
+9. [Matchmaking & Win-Rate Control](#9-matchmaking--win-rate-control-rigged-deck-shuffle)
+10. [Edge AI Benchmarking](#10-edge-ai-benchmarking)
+11. [Technical Performance Results](#11-technical-performance-results)
+12. [Project Files](#12-project-files)
 
 ---
 
@@ -204,7 +205,24 @@ Instead of legacy locking-in mechanics based on hand stillness (velocity trackin
 
 ---
 
-## 9. Edge AI Benchmarking
+## 9. Matchmaking & Win-Rate Control (Rigged Deck Shuffle)
+
+The game features a controlled win-rate strategy called the **Rigged Deck Shuffle** to guarantee a natural and engaging play experience.
+
+### How it Works
+1. **Pre-defined Pool**: The game state machine initializes a pool of 10 matches: `[1, 1, 1, 0, 1, 1, 0, 1, 1, 1]`.
+   - `1` = The machine counters the player's gesture perfectly (machine wins).
+   - `0` = The machine intentionally throws the match by choosing the gesture beaten by the player's throw (player wins).
+2. **Shuffled Order**: The deck is shuffled on game startup using `random.shuffle`.
+3. **Popping Moves**: Whenever a valid round resolves, the state machine pops the first value from the deck:
+   - Popped `1` -> AI plays winning counter.
+   - Popped `0` -> AI plays losing counter.
+4. **Replenishment**: Once the deck size hits 0, the pool is replenished and reshuffled automatically.
+5. **Exact Win-Rate**: This guarantees that the player wins exactly 20% of valid rounds, preventing extreme winning or losing streaks while keeping the interval between player wins completely natural.
+
+---
+
+## 10. Edge AI Benchmarking
 
 A comprehensive benchmark suite is included to profile the system on any hardware — intended for Raspberry Pi vs. laptop before/after comparisons:
 
@@ -246,7 +264,7 @@ python benchmarks.py --output rpi_after.json --csv --stress
 ```
 ---
 
-## 10. Technical Performance Results
+## 11. Technical Performance Results
 
 ### On Development Hardware (Windows, mid-tier CPU)
 | Metric | Value |
@@ -266,7 +284,7 @@ python benchmarks.py --output rpi_after.json --csv --stress
 - Camera reconnect (30 failures → reopen): **~1.2 seconds**
 ---
 
-## 11. Project Files
+## 12. Project Files
 
 ```
 SPS/
@@ -306,7 +324,8 @@ SPS/
 │   └── gesture_comparison.py   # Result screen gesture comparison widget
 │
 ├── tests/
-│   └── synthetic_hand.py       # Synthetic landmark generator for dry-run tests
+│   ├── synthetic_hand.py       # Synthetic landmark generator for dry-run tests
+│   └── test_state_machine.py   # Unit tests for rigged deck shuffle state machine logic
 │
 ├── assets/                     # PNG icons (rock, paper, scissors, hand guide)
 └── logs/                       # Session CSV logs (auto-generated)

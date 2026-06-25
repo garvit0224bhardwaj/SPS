@@ -281,6 +281,22 @@ The system is in a **production-ready, bar-deployable state** with the following
 
 ---
 
+## Phase 11: Rigged Deck Shuffle (Win Rate Control)
+
+### Goal
+Implement a controlled win-rate matchmaking strategy ("Rigged Deck Shuffle") that guarantees players win exactly 20% of valid rounds to prevent extreme winning/losing streaks, while keeping the gameplay feel natural and organic.
+
+### Solution
+- **Pre-defined Match Deck**: Initialized a pool of 10 matches represented as an array of 1s and 0s (`[1, 1, 1, 0, 1, 1, 0, 1, 1, 1]`) in the state machine constructor, where `1` represents perfect play (machine wins) and `0` represents throwing the match (machine loses).
+- **Match Shuffling**: Shuffled the pool during boot using `random.shuffle`.
+- **Dynamic De-queuing**: Each valid round resolution pops the first item from the deck:
+  - If `1`, the machine counters the player's choice perfectly.
+  - If `0`, the machine deliberately chooses the gesture beaten by the player's choice.
+- **Replenishment**: Once the deck hits 0 items, a new pool of 10 matches is replenished and reshuffled automatically.
+- **Automated Validation**: Created a unit test suite to verify the deck's initialization size, distribution (80% machine win-rate / 20% player win-rate), replenishment trigger, and rigged behaviors.
+
+---
+
 ## Next Phase: Raspberry Pi / Edge Device Optimization (Planned)
 
 The project is being prepared for deployment on Raspberry Pi 5 and similar edge SBCs. Key planned optimizations:
